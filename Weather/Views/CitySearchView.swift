@@ -11,6 +11,8 @@ struct CitySearchView: View {
     @Environment(\.isSearching) private var isSearching
     @State private var isUpdating = false
     @ObservedObject var viewModel = SearchListViewModel()
+    @State private var showNetworkAlert = false
+    @State private var showSaveDataAlert = false
     
     var body: some View {
         ZStack {
@@ -21,18 +23,33 @@ struct CitySearchView: View {
                             CitySearchViewRow(city: cityItem).onTapGesture {
                                 if !cityItem.isLocal {
                                     Task {
-                                        await viewModel.storeCity(city: cityItem)
+                                        do {
+                                            try await viewModel.storeCity(city: cityItem)
+                                        } catch {
+                                            showSaveDataAlert = true
+                                        }
+                                        isUpdating = false
                                     }
                                 }
                             }
                         }
+                    }
+                    .alert("Citys aquire error", isPresented: $showNetworkAlert) {
+                        Button("Ok", role: .cancel) {}
+                    }
+                    .alert("Save data error", isPresented: $showSaveDataAlert) {
+                        Button("Ok", role: .cancel) {}
                     }
                     .navigationTitle("Search city")
                     .searchable(text: $viewModel.searchString,placement: .navigationBarDrawer(displayMode: .always))
                     .onSubmit(of: .search) {
                         isUpdating = true
                         Task {
-                            await viewModel.searchCitys()
+                            do {
+                                try await viewModel.searchCitys()
+                            } catch {
+                                showNetworkAlert = true
+                            }
                             isUpdating = false
                         }
                     }

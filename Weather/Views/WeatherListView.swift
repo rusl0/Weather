@@ -7,10 +7,13 @@
 
 import SwiftUI
 
+
+
 struct WeatherListView: View {
     @Environment(\.managedObjectContext) private var viewContext
     @FetchRequest(sortDescriptors: [NSSortDescriptor(keyPath: \Forecast.name, ascending: true)], animation: .default)
     private var items: FetchedResults<Forecast>
+    @State private var showAlert = false
     
     var body: some View {
         NavigationView {
@@ -22,14 +25,17 @@ struct WeatherListView: View {
                                 Text(item.name ?? "" )
                                     .font(.title2)
                                     .bold()
+                                Text(" \(item.country ?? "")")
+                                    .font(.title2)
+                                    .bold()
                                 Spacer()
                                 Text(temperatureFormatter(value: item.temperature))
                                     .font(.title2)
                             }
                             .padding(.bottom, 1)
                             VStack(alignment: .leading){
-                                Text("Скорость ветра: \(item.windSpeed) м/с")
-                                Text("Направление ветра \(item.windAngle)")
+                                Text("Wind speed: \(speedFormatter(value:item.windSpeed)) m/s")
+                                Text("Wind direction: \(item.windAngle) \(angleFormatter(value: item.windAngle))")
                             }
                             .padding(.bottom)
                         }
@@ -39,23 +45,29 @@ struct WeatherListView: View {
                 }
                 .onDelete(perform: deleteItems)
             }
+            .alert("Update error", isPresented: $showAlert, actions: {
+                Button("Ok",role: .cancel) {}
+            })
             .navigationTitle("Forecast")
             .listStyle(.inset)
         }
         .refreshable {
             Task {
-                await updateData()
+                do {
+                    try await updateData()
+                } catch {
+                    showAlert = true
+                }
             }
         }
     }
     
-    private func updateData() async {
+    private func updateData() async throws{
         let request = Forecast.fetchRequest()
         request.sortDescriptors = [NSSortDescriptor(key: "timestamp", ascending: true)]
         request.fetchLimit = 60
         
         guard let date = Calendar.current.date(byAdding: .hour, value: -3, to: Date()) else {
-            print("error")
             return
         }
         
@@ -65,7 +77,6 @@ struct WeatherListView: View {
         await withTaskGroup(of: Void.self) { taskGroup in
             for forecastItem in forecastResult {
                 taskGroup.addTask {
-                    
                     do {
                         let forecastEndpoint = WeatherAPIEndpoint.forecast(lat: forecastItem.lat, lon: forecastItem.lon)
                         let (data,_) = try await URLSession.shared.data(from: forecastEndpoint.url)
@@ -121,4 +132,51 @@ func temperatureFormatter(value: Double) -> String {
     formatter.numberFormatter.maximumFractionDigits = 0
     formatter.unitOptions = .temperatureWithoutUnit
     return formatter.string(from: measurement)
+}
+
+func speedFormatter(value: Double) -> String {
+    let formatter = NumberFormatter()
+    formatter.numberStyle = .decimal
+    formatter.maximumFractionDigits = 1
+    return formatter.string(from: NSNumber(value: value)) ?? "0"
+}
+
+func angleFormatter(value: Int16) -> String {
+    
+    switch value {
+        case 0..<12,349...360:
+            return "N"
+        case 12..<34:
+            return "NNE"
+        case 34..<57:
+            return "NE"
+        case 57..<79:
+            return "ENE"
+        case 79..<102:
+            return "E"
+        case 102..<124:
+            return "ESE"
+        case 124..<147:
+            return "SE"
+        case 147..<169:
+            return "SSE"
+        case 169..<192:
+            return "S"
+        case 192..<214:
+            return "SSW"
+        case 214..<237:
+            return "SW"
+        case 237..<259:
+            return "WSW"
+        case 259..<282:
+            return "W"
+        case 282..<304:
+            return "WNW"
+        case 304..<327:
+            return "NW"
+        case 327..<349:
+            return "NNW"
+        default:
+            return ""
+    }
 }

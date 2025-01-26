@@ -8,6 +8,13 @@
 import SwiftUI
 import CoreData
 
+enum SearchError: Error {
+    
+    case dataAquireError
+    case dataSaveError
+}
+
+
 class SearchListViewModel: ObservableObject {
     
     private let context = PersistenceController.shared.container.viewContext
@@ -15,21 +22,19 @@ class SearchListViewModel: ObservableObject {
     @Published var citys = [CityResponse]()
     @Published var searchString = ""
 
-    public func searchCitys() async {
+    public func searchCitys() async throws {
         do {
             let request = Forecast.fetchRequest()
             request.sortDescriptors = [NSSortDescriptor(key: "name", ascending: true)]
             cityFetchedResult = (try? context.fetch(request)) ?? []
-            
             
             let endpoint = WeatherAPIEndpoint.geo(name: searchString)
             let (data,_) = try await URLSession.shared.data(from: endpoint.url)
             let result = try JSONDecoder().decode([CityResponse].self, from: data)
             
             await MainActor.run(body: {
-                
                 citys = result.map { item in
-                    if cityFetchedResult.contains(where: { $0.name == item.name && $0.country == item.country }) {
+                    if cityFetchedResult.contains(where: { $0.name == item.name && $0.country == item.country && $0.lat == item.lat && $0.lon == item.lon }) {
                         var newItem = item
                         newItem.isLocal = true
                         return newItem
@@ -41,6 +46,7 @@ class SearchListViewModel: ObservableObject {
             await MainActor.run(body: {
                 citys = []
             })
+            throw SearchError.dataAquireError
         }
     }
     
@@ -48,9 +54,8 @@ class SearchListViewModel: ObservableObject {
         citys = []
     }
     
-    public func storeCity(city: CityResponse) async {
+    public func storeCity(city: CityResponse) async throws {
         do {
-            print("Exec")
             let forecastEndpoint = WeatherAPIEndpoint.forecast(lat: city.lat, lon: city.lon)
             let (data,_) = try await URLSession.shared.data(from: forecastEndpoint.url)
             let forecast = try JSONDecoder().decode(ForecastResponse.self, from: data)
@@ -73,7 +78,7 @@ class SearchListViewModel: ObservableObject {
             
             await MainActor.run(body: {
                 citys = citys.map { item in
-                    if item.name == city.name && item.country == city.country {
+                    if item.name == city.name && item.country == city.country && item.lat == city.lat && item.lon == city.lon {
                         var newItem = item
                         newItem.isLocal = true
                         return newItem
@@ -83,8 +88,7 @@ class SearchListViewModel: ObservableObject {
                 }
             })
         } catch {
-            let nsError = error as NSError
-            fatalError("Unresolved error \(nsError), \(nsError.userInfo)")
+            throw SearchError.dataSaveError
         }
     }
 }

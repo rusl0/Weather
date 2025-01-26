@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		99944E142D4412C800A4A2FD /* CityWeatherSheetViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99944E132D4412C800A4A2FD /* CityWeatherSheetViewModel.swift */; };
 		99944E392D455C0500A4A2FD /* CitySearchViewRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99944E382D455C0500A4A2FD /* CitySearchViewRow.swift */; };
 		99944E432D4566AB00A4A2FD /* LoadingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99944E422D4566AB00A4A2FD /* LoadingView.swift */; };
 		999EED922D457AF700718BD5 /* Forecast+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 999EED902D457AF700718BD5 /* Forecast+CoreDataClass.swift */; };
@@ -50,7 +49,6 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		99944E132D4412C800A4A2FD /* CityWeatherSheetViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CityWeatherSheetViewModel.swift; sourceTree = "<group>"; };
 		99944E382D455C0500A4A2FD /* CitySearchViewRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CitySearchViewRow.swift; sourceTree = "<group>"; };
 		99944E422D4566AB00A4A2FD /* LoadingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadingView.swift; sourceTree = "<group>"; };
 		999EED902D457AF700718BD5 /* Forecast+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Forecast+CoreDataClass.swift"; sourceTree = "<group>"; };
@@ -191,7 +189,6 @@
 			isa = PBXGroup;
 			children = (
 				99A8E9332D42A7E20031A0C4 /* SearchListViewModel.swift */,
-				99944E132D4412C800A4A2FD /* CityWeatherSheetViewModel.swift */,
 			);
 			path = ViewModels;
 			sourceTree = "<group>";
@@ -375,7 +372,6 @@
 				99A8E9412D43CEBB0031A0C4 /* WeatherAPIEndpoint.swift in Sources */,
 				99A8E92F2D4289D50031A0C4 /* CityResponse.swift in Sources */,
 				99A8E9342D42A7E20031A0C4 /* SearchListViewModel.swift in Sources */,
-				99944E142D4412C800A4A2FD /* CityWeatherSheetViewModel.swift in Sources */,
 				99A8E8F92D415C690031A0C4 /* WeatherApp.swift in Sources */,
 				99A8E9282D416B070031A0C4 /* CitySearchView.swift in Sources */,
 				99944E432D4566AB00A4A2FD /* LoadingView.swift in Sources */,

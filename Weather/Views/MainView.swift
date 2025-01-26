@@ -13,12 +13,12 @@ struct MainView: View {
             WeatherListView()
                 .tabItem {
                     Image(systemName: "1.circle")
-                    Text("Search")
+                    Text("Weather")
                 }
             CitySearchView()
                 .tabItem {
                     Image(systemName: "2.circle")
-                    Text("Weather")
+                    Text("Search")
                 }
         }
     }
